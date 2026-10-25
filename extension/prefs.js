@@ -6,7 +6,7 @@ import Gtk from 'gi://Gtk';
 
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {ChatClient} from './lib/api.js';
+import {ChatClient, FREE_TIER_URL} from './lib/api.js';
 
 const EFFORTS = [
     ['none', 'Off — fastest'],
@@ -46,9 +46,27 @@ export default class PenguinPreferences extends ExtensionPreferences {
 
         const model = new Adw.PreferencesGroup({
             title: 'Model',
-            description: 'Any OpenAI-compatible API. Questions about the screen need a model that accepts images.',
+            description: 'Penguin’s free tier works without setup and has a daily allowance. For more, use any ' +
+                'OpenAI-compatible API with your own key. Questions about the screen need a model that accepts images.',
         });
         page.add(model);
+
+        const freeTier = new Adw.ActionRow({
+            title: 'Free tier',
+            subtitle: 'Gemma 4 through penguin.zenbleed.tech. Switching back resets the URL, key and model below.',
+        });
+        const useFreeTier = new Gtk.Button({valign: Gtk.Align.CENTER});
+        // Resetting the key too keeps a key for another provider from being sent to the free tier.
+        useFreeTier.connect('clicked', () => ['api-base-url', 'api-key', 'model'].forEach(k => settings.reset(k)));
+        const syncFreeTier = () => {
+            const inUse = settings.get_string('api-base-url').trim().replace(/\/+$/, '') === FREE_TIER_URL;
+            useFreeTier.label = inUse ? 'In use' : 'Use';
+            useFreeTier.sensitive = !inUse;
+        };
+        syncFreeTier();
+        settings.connect('changed::api-base-url', syncFreeTier);
+        freeTier.add_suffix(useFreeTier);
+        model.add(freeTier);
 
         const url = new Adw.EntryRow({title: 'API URL'});
         settings.bind('api-base-url', url, 'text', Gio.SettingsBindFlags.DEFAULT);
@@ -105,6 +123,16 @@ export default class PenguinPreferences extends ExtensionPreferences {
         const translate = new Adw.EntryRow({title: 'Translate English text into'});
         settings.bind('translate-language', translate, 'text', Gio.SettingsBindFlags.DEFAULT);
         answers.add(translate);
+
+        const privacy = new Adw.PreferencesGroup({title: 'Privacy'});
+        page.add(privacy);
+        privacy.add(new Adw.ActionRow({
+            title: 'What leaves your computer',
+            subtitle: 'Only when you ask something: your question, the selected or copied text, and any screenshot ' +
+                'go to the API above. On the free tier that is penguin.zenbleed.tech, through Cloudflare, and Sarvam AI. ' +
+                'The free-tier server keeps the time, your IP address and token counts for 31 days, never what you asked.',
+            subtitle_selectable: true,
+        }));
 
         return page;
     }

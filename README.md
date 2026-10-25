@@ -2,30 +2,53 @@
 
 An AI assistant built into GNOME Shell. Ask anything, ask about your screen or selected text, and look up words from anywhere.
 
-Works with any OpenAI-compatible API. Screen questions need a model that accepts images.
+It works right after install on a free tier, with no account or key. If you want more, point it at any OpenAI-compatible API and use your own key.
+
+![Look Up explaining a word in context](screenshots/01-lookup.png)
+
+![Asking Penguin about a selected term](screenshots/02-ask-banner.png)
+
+![Model and connection settings](screenshots/03-prefs-general.png)
+
+![Keyboard shortcut settings](screenshots/04-prefs-shortcuts.png)
+
+![Appearance settings](screenshots/05-prefs-appearance.png)
 
 ## Requirements
 
 - GNOME Shell 50
-- An API key for an OpenAI-compatible endpoint
 
 ## Install
+
+From [extensions.gnome.org](https://extensions.gnome.org) search for **Penguin Assistant**, or from this repo:
 
 ```bash
 ./install.sh
 ```
 
-The installer copies the extension into `~/.local/share/gnome-shell/extensions`, installs the `penguin` command, and downloads the offline dictionary used by Look Up.
+The installer copies the extension into `~/.local/share/gnome-shell/extensions`, installs the `penguin` command and a launcher, and downloads the offline dictionary that Look Up uses.
 
-If no API key is set, it will prompt for one. You can also pass it:
+Log out and back in so GNOME Shell loads the extension, then press **Super+I** and ask something.
+
+## Free tier
+
+By default Penguin uses Gemma 4 through `penguin.zenbleed.tech`, a small proxy run by the author, with [Sarvam AI](https://www.sarvam.ai/) behind it. The first time you ask something, Penguin makes a random key for your install and keeps it in its settings. There is no sign-up.
+
+The free tier has daily limits per install and per network (IP address), plus a total for everyone. They reset at midnight IST. When you hit one, Penguin says so; you can wait, or switch to your own key.
+
+## Use your own API
+
+Open **Extensions → Penguin Assistant → Settings** and set the API URL, key, and model of any OpenAI-compatible service, for example `https://api.openai.com/v1` with `gpt-4o`. Questions about the screen need a model that accepts images. **Free tier → Use** switches back and clears your key.
+
+You can also set your provider when installing:
 
 ```bash
-PENGUIN_API_KEY=sk-... ./install.sh
+PENGUIN_API_URL=https://api.openai.com/v1 PENGUIN_MODEL=gpt-4o PENGUIN_API_KEY=sk-... ./install.sh
 ```
 
-Log out and back in so GNOME Shell loads the extension. Then open **Extensions → Penguin → Settings** and set the API URL, key, and model if you did not do that during install.
+## Privacy
 
-Defaults are `https://api.openai.com/v1` and `gpt-4o`. Any compatible endpoint works.
+Penguin sends something only when you ask: your question, the text you selected or copied, and the screenshot for screen questions. They go to the API in your settings. On the free tier that is `penguin.zenbleed.tech` (behind Cloudflare), which forwards them to Sarvam AI. The free-tier server keeps the time, your IP address, your install's key id, and token counts for 31 days, to enforce the limits. It never stores your questions, answers, or screenshots.
 
 ## Shortcuts
 
@@ -33,11 +56,11 @@ Defaults are `https://api.openai.com/v1` and `gpt-4o`. Any compatible endpoint w
 | --- | --- |
 | Open or close Penguin | Super+I |
 | Ask about the screen | Shift+Super+S |
-| Explain selected or copied text | Shift+Super+C |
-| Look up the selected word | Ctrl+Super+D |
+| Explain selected or copied text | not set |
+| Look up the selected word | not set |
 | New chat | Shift+Super+N |
 
-Change these in Penguin preferences. To also list them under **Settings → Keyboard → View and Customize Shortcuts**:
+The two that read your selection or clipboard start unbound; set them in Penguin's preferences. To also list Penguin's shortcuts under **Settings → Keyboard → View and Customize Shortcuts**:
 
 ```bash
 ./system-integration.sh
@@ -66,35 +89,15 @@ penguin prefs        # open preferences
 
 ## Publish on extensions.gnome.org
 
-Penguin can be listed on [extensions.gnome.org](https://extensions.gnome.org) like any other GNOME Shell extension. The site reviews the zip for security, not for bugs. You need a [GNOME account](https://extensions.gnome.org/accounts/login/), then upload at [extensions.gnome.org/upload](https://extensions.gnome.org/upload/).
-
-Pack only the extension directory (not this whole repo). `gnome-extensions pack` already picks up `extension.js`, `metadata.json`, `prefs.js`, `stylesheet.css`, and `schemas/`. The `lib/` and `icons/` trees have to be named:
+Pack only the extension directory, not the whole repo. `gnome-extensions pack` picks up `extension.js`, `metadata.json`, `prefs.js`, `stylesheet.css`, and `schemas/`; `lib/` and `icons/` have to be named:
 
 ```bash
-gnome-extensions pack extension \
-  --extra-source=lib \
-  --extra-source=icons \
-  --force \
-  -o .
+gnome-extensions pack extension --extra-source=lib --extra-source=icons --force -o .
 ```
 
-That writes `penguin@sumit.github.io.shell-extension.zip`. You can upload that file on the site, or:
+That writes `penguin@sumit.github.io.shell-extension.zip`. Upload it at [extensions.gnome.org/upload](https://extensions.gnome.org/upload/) (or with `gnome-extensions upload`), then add the images in `screenshots/` on the extension's page. Each new version is reviewed again against the [review guidelines](https://gjs.guide/extensions/review-guidelines/review-guidelines.html).
 
-```bash
-gnome-extensions upload --accept-tos penguin@sumit.github.io.shell-extension.zip
-```
-
-An EGO install is the Shell extension only. The `penguin` command, desktop launcher, Activities search icon, and offline dictionary still come from `./install.sh` (or `./install-dictionary.py`). After an EGO install those extras are optional.
-
-Reviewers follow the [review guidelines](https://gjs.guide/extensions/review-guidelines/review-guidelines.html). For this project, expect them to look at:
-
-- **Clipboard and screen capture.** Look Up and “explain selection” read the selection or clipboard, and screen questions send a screenshot. The description must say that. Sharing that data with an API is only allowed after the user asks (a button or a shortcut they set). The guidelines also say not to ship default shortcuts that touch the clipboard — the current Shift+Super+C / Ctrl+Super+D defaults may need to be empty for EGO, with the user binding them in preferences.
-- **No secrets in the zip.** The API key stays in GSettings. Defaults are a public OpenAI URL and an empty key.
-- **No extra files.** Do not pack `install.sh`, `dev/`, the dictionary download, or this README.
-- **`metadata.json`.** Drop unused keys. Do not set `version`; the site assigns it. `url` should point at the public GitHub repo once it exists.
-- **GPL-2.0-or-later.** Required because extensions are derived from GNOME Shell.
-
-Add a couple of screenshots on the upload form. Updates use the same form; each new zip is reviewed again.
+An install from extensions.gnome.org is the Shell extension only. The `penguin` command, launcher, Activities search icon, and offline dictionary come from `./install.sh`.
 
 ## Develop
 

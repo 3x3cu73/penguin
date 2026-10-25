@@ -6,9 +6,15 @@ Gio._promisify(Soup.Session.prototype, 'send_async');
 Gio._promisify(Soup.Session.prototype, 'send_and_read_async');
 Gio._promisify(Gio.DataInputStream.prototype, 'read_line_async');
 Gio._promisify(Gio.InputStream.prototype, 'read_bytes_async');
+Gio._promisify(Gio.File.prototype, 'read_async');
+
+/** Penguin's hosted free tier. Each install sends its own random key, made on first use. */
+export const FREE_TIER_URL = 'https://penguin.zenbleed.tech/v1';
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
+
+let pendingKey = null;
 
 // Not every OpenAI-compatible server knows these; they are dropped and the
 // request retried once if a 400 response names them.
@@ -76,8 +82,10 @@ export class ChatClient {
      */
     async complete(messages, {reasoningEffort = 'low', onText = null, cancellable = null} = {}) {
         const base = this._settings.get_string('api-base-url').trim().replace(/\/+$/, '');
-        const key = this._settings.get_string('api-key').trim();
+        let key = this._settings.get_string('api-key').trim();
         const model = this._settings.get_string('model').trim();
+        if (!key && base === FREE_TIER_URL)
+            key = await freeTierKey(this._settings);
         if (!key)
             throw new Error('No API key yet. Add one in Penguin preferences.');
 
@@ -161,6 +169,24 @@ export class ChatClient {
     }
 }
 
+/** Makes and saves this install's free-tier key; concurrent first requests share one. */
+function freeTierKey(settings) {
+    pendingKey ??= (async () => {
+        const stream = await Gio.File.new_for_path('/dev/urandom').read_async(GLib.PRIORITY_DEFAULT, null);
+        const bytes = await stream.read_bytes_async(32, GLib.PRIORITY_DEFAULT, null);
+        stream.close_async(GLib.PRIORITY_DEFAULT, null, null);
+        if (bytes.get_size() < 32)
+            throw new Error('Couldn’t make a key for the free tier.');
+        const random = GLib.base64_encode(bytes.toArray()).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const key = `pg-${random}`;
+        settings.set_string('api-key', key);
+        return key;
+    })().finally(() => {
+        pendingKey = null;
+    });
+    return pendingKey;
+}
+
 async function readAll(input, cancellable) {
     const chunks = [];
     let size = 0;
@@ -218,10 +244,11 @@ function describeError(status, reason, body) {
 
     const summary = {
         401: 'The API key was rejected.',
-        403: 'This key can’t use that model.',
+        403: 'Access denied.',
         404: 'The API URL or model wasn’t found.',
         413: 'The request was too large.',
-        429: 'Rate limited. Try again in a moment.',
+        429: 'Limit reached.',
+        503: 'The AI service is unavailable right now.',
     }[status] ?? (status >= 500
         ? `The AI server had a problem (${status}).`
         : `Request failed (${status} ${reason ?? ''}).`);

@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 # Installs Penguin for the current user (no root needed).
 #
-#   ./install.sh                     install / update
-#   PENGUIN_API_KEY=sk-... ./install.sh   install and set the API key
+#   ./install.sh                     install / update; Penguin starts on its free tier
+#   PENGUIN_API_URL=https://api.openai.com/v1 PENGUIN_MODEL=gpt-4o PENGUIN_API_KEY=sk-... ./install.sh
+#                                    install and use your own OpenAI-compatible provider
 #   ./install.sh --build-only DIR    only assemble the extension into DIR (used by dev/)
 set -euo pipefail
+
+if [[ -n "${PENGUIN_API_KEY:-}" && -z "${PENGUIN_API_URL:-}" ]]; then
+    echo "Set PENGUIN_API_URL too, so your API key isn't sent to Penguin's free tier." >&2
+    exit 1
+fi
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 UUID=penguin@sumit.github.io
@@ -51,17 +57,16 @@ if [[ ! -f "$DATA/penguin/dictionary/info.json" ]]; then
     python3 "$ROOT/install-dictionary.py" || echo "Skipped the offline dictionary; run ./install-dictionary.py to try again." >&2
 fi
 
-key="${PENGUIN_API_KEY:-}"
-if [[ -z "$key" && "$(gsettings get "$SCHEMA" api-key)" == "''" && -t 0 ]]; then
-    read -r -s -p "API key for $(gsettings get "$SCHEMA" api-base-url): " key
-    echo
-fi
-if [[ -n "$key" ]]; then
-    PENGUIN_KEY="$key" python3 -c '
+if [[ -n "${PENGUIN_API_URL:-}" ]]; then
+    python3 - "$SCHEMA" <<'EOF'
 import os, sys
 from gi.repository import Gio
-Gio.Settings.new(sys.argv[1]).set_string("api-key", os.environ["PENGUIN_KEY"])
-Gio.Settings.sync()' "$SCHEMA"
+settings = Gio.Settings.new(sys.argv[1])
+for name, variable in (("api-base-url", "PENGUIN_API_URL"), ("model", "PENGUIN_MODEL"), ("api-key", "PENGUIN_API_KEY")):
+    if os.environ.get(variable):
+        settings.set_string(name, os.environ[variable])
+Gio.Settings.sync()
+EOF
 fi
 
 # Enable for the next login. The running shell ignores UUIDs it hasn't loaded yet.

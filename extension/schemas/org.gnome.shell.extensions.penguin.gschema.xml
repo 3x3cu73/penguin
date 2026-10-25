@@ -2,16 +2,17 @@
 <schemalist gettext-domain="penguin">
   <schema id="org.gnome.shell.extensions.penguin" path="/org/gnome/shell/extensions/penguin/">
     <key name="api-base-url" type="s">
-      <default>'https://api.openai.com/v1'</default>
+      <default>'https://penguin.zenbleed.tech/v1'</default>
       <summary>API base URL</summary>
-      <description>OpenAI-compatible endpoint, usually ending in /v1.</description>
+      <description>OpenAI-compatible endpoint, usually ending in /v1. The default is Penguin’s free tier.</description>
     </key>
     <key name="api-key" type="s">
       <default>''</default>
       <summary>API key</summary>
+      <description>On the free tier Penguin makes its own key the first time it asks something.</description>
     </key>
     <key name="model" type="s">
-      <default>'gpt-4o'</default>
+      <default>'gemma4'</default>
       <summary>Model</summary>
       <description>Must accept image input for screen questions.</description>
     </key>
@@ -54,7 +55,7 @@
       <summary>Offer “Ask Penguin” in Activities search</summary>
     </key>
     <key name="toggle-assistant" type="as">
-      <default><![CDATA[['<Super>i', '<Shift><Super>F23']]]></default>
+      <default><![CDATA[['<Super>i']]]></default>
       <summary>Open or close Penguin</summary>
     </key>
     <key name="ask-screen" type="as">
@@ -62,11 +63,11 @@
       <summary>Ask about the screen</summary>
     </key>
     <key name="ask-selection" type="as">
-      <default><![CDATA[['<Shift><Super>c']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Ask about the selection or clipboard</summary>
     </key>
     <key name="look-up" type="as">
-      <default><![CDATA[['<Control><Super>d']]]></default>
+      <default><![CDATA[[]]]></default>
       <summary>Look up the selected word</summary>
     </key>
     <key name="new-chat" type="as">

@@ -1,7 +1,7 @@
 {
   "uuid": "penguin@sumit.github.io",
-  "name": "Penguin",
-  "description": "An AI assistant built into GNOME Shell. Ask anything, ask about your screen or selected text, and look up words from anywhere.",
+  "name": "Penguin Assistant",
+  "description": "An AI assistant built into GNOME Shell. Ask anything, ask about your screen or selected text, and look up words from anywhere.\n\nWorks out of the box on a free tier with a daily allowance: Gemma 4 through the developer's server, penguin.zenbleed.tech, and Sarvam AI. Or use any OpenAI-compatible API with your own key.\n\nPenguin reads the selection or clipboard, or captures the screen, only when you trigger an action, and sends it to the API in use. The free-tier server keeps the time, IP address and token counts for 31 days, never your questions.\n\nThe selection and look-up shortcuts are unbound by default; set them in preferences.",
   "shell-version": ["50"],
   "settings-schema": "org.gnome.shell.extensions.penguin",
   "gettext-domain": "penguin",
