@@ -2,15 +2,11 @@
 # Installs Penguin for the current user (no root needed).
 #
 #   ./install.sh                     install / update; Penguin starts on its free tier
-#   PENGUIN_API_URL=https://api.openai.com/v1 PENGUIN_MODEL=gpt-4o PENGUIN_API_KEY=sk-... ./install.sh
-#                                    install and use your own OpenAI-compatible provider
+#   PENGUIN_API_KEY=sk-... ./install.sh
+#                                    install and use a custom provider (OpenAI unless
+#                                    PENGUIN_API_URL and PENGUIN_MODEL say otherwise)
 #   ./install.sh --build-only DIR    only assemble the extension into DIR (used by dev/)
 set -euo pipefail
-
-if [[ -n "${PENGUIN_API_KEY:-}" && -z "${PENGUIN_API_URL:-}" ]]; then
-    echo "Set PENGUIN_API_URL too, so your API key isn't sent to Penguin's free tier." >&2
-    exit 1
-fi
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 UUID=penguin@sumit.github.io
@@ -57,11 +53,12 @@ if [[ ! -f "$DATA/penguin/dictionary/info.json" ]]; then
     python3 "$ROOT/install-dictionary.py" || echo "Skipped the offline dictionary; run ./install-dictionary.py to try again." >&2
 fi
 
-if [[ -n "${PENGUIN_API_URL:-}" ]]; then
+if [[ -n "${PENGUIN_API_KEY:-}${PENGUIN_API_URL:-}" ]]; then
     python3 - "$SCHEMA" <<'EOF'
 import os, sys
 from gi.repository import Gio
 settings = Gio.Settings.new(sys.argv[1])
+settings.set_boolean("use-free-tier", False)
 for name, variable in (("api-base-url", "PENGUIN_API_URL"), ("model", "PENGUIN_MODEL"), ("api-key", "PENGUIN_API_KEY")):
     if os.environ.get(variable):
         settings.set_string(name, os.environ[variable])

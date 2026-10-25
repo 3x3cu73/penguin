@@ -38,12 +38,13 @@ The free tier has daily limits per install and per network (IP address), plus a 
 
 ## Use your own API
 
-Open **Extensions → Penguin Assistant → Settings** and set the API URL, key, and model of any OpenAI-compatible service, for example `https://api.openai.com/v1` with `gpt-4o`. Questions about the screen need a model that accepts images. **Free tier → Use** switches back and clears your key.
+In **Extensions → Penguin Assistant → Settings**, set **Provider** to **Custom** and enter the API URL, key, and model of any OpenAI-compatible service (OpenAI's URL and `gpt-4o` are filled in). Screen questions need a model that reads images. Switch back to **Free tier** at any time; your custom settings are kept, and your key is never sent to the free tier.
 
-You can also set your provider when installing:
+You can also pick a custom provider when installing:
 
 ```bash
-PENGUIN_API_URL=https://api.openai.com/v1 PENGUIN_MODEL=gpt-4o PENGUIN_API_KEY=sk-... ./install.sh
+PENGUIN_API_KEY=sk-... ./install.sh
+PENGUIN_API_URL=https://example.com/v1 PENGUIN_MODEL=some-model PENGUIN_API_KEY=... ./install.sh
 ```
 
 ## Privacy

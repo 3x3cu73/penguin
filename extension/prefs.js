@@ -6,7 +6,7 @@ import Gtk from 'gi://Gtk';
 
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import {ChatClient, FREE_TIER_URL} from './lib/api.js';
+import {ChatClient, FREE_TIER_MODEL} from './lib/api.js';
 
 const EFFORTS = [
     ['none', 'Off — fastest'],
@@ -44,29 +44,15 @@ export default class PenguinPreferences extends ExtensionPreferences {
     _generalPage(settings) {
         const page = new Adw.PreferencesPage({title: 'General', icon_name: 'preferences-system-symbolic'});
 
-        const model = new Adw.PreferencesGroup({
-            title: 'Model',
-            description: 'Penguin’s free tier works without setup and has a daily allowance. For more, use any ' +
-                'OpenAI-compatible API with your own key. Questions about the screen need a model that accepts images.',
-        });
+        const model = new Adw.PreferencesGroup({title: 'Model'});
         page.add(model);
 
-        const freeTier = new Adw.ActionRow({
-            title: 'Free tier',
-            subtitle: 'Gemma 4 through penguin.zenbleed.tech. Switching back resets the URL, key and model below.',
-        });
-        const useFreeTier = new Gtk.Button({valign: Gtk.Align.CENTER});
-        // Resetting the key too keeps a key for another provider from being sent to the free tier.
-        useFreeTier.connect('clicked', () => ['api-base-url', 'api-key', 'model'].forEach(k => settings.reset(k)));
-        const syncFreeTier = () => {
-            const inUse = settings.get_string('api-base-url').trim().replace(/\/+$/, '') === FREE_TIER_URL;
-            useFreeTier.label = inUse ? 'In use' : 'Use';
-            useFreeTier.sensitive = !inUse;
-        };
-        syncFreeTier();
-        settings.connect('changed::api-base-url', syncFreeTier);
-        freeTier.add_suffix(useFreeTier);
-        model.add(freeTier);
+        const provider = new Adw.ActionRow({title: 'Provider'});
+        const providers = new Adw.ToggleGroup({valign: Gtk.Align.CENTER});
+        providers.add(new Adw.Toggle({name: 'free', label: 'Free tier'}));
+        providers.add(new Adw.Toggle({name: 'custom', label: 'Custom'}));
+        provider.add_suffix(providers);
+        model.add(provider);
 
         const url = new Adw.EntryRow({title: 'API URL'});
         settings.bind('api-base-url', url, 'text', Gio.SettingsBindFlags.DEFAULT);
@@ -82,7 +68,7 @@ export default class PenguinPreferences extends ExtensionPreferences {
 
         const effort = new Adw.ComboRow({
             title: 'Thinking',
-            subtitle: 'More thinking helps with hard questions but answers slower',
+            subtitle: 'Slower, but better at hard questions',
             model: Gtk.StringList.new(EFFORTS.map(([, label]) => label)),
         });
         const syncEffort = () => {
@@ -93,22 +79,36 @@ export default class PenguinPreferences extends ExtensionPreferences {
         settings.connect('changed::reasoning-effort', syncEffort);
         model.add(effort);
 
-        const test = new Adw.ActionRow({title: 'Test connection', subtitle: 'Sends a tiny request with these settings'});
+        const test = new Adw.ActionRow({title: 'Test connection'});
         const testButton = new Gtk.Button({label: 'Test', valign: Gtk.Align.CENTER});
         testButton.connect('clicked', () => this._testConnection(settings, test, testButton));
         test.add_suffix(testButton);
         test.activatable_widget = testButton;
         model.add(test);
 
-        const network = new Adw.PreferencesGroup({
-            title: 'Network',
-            description: 'Turn this on if connecting fails with a TLS or certificate error behind ' +
-                'an intercepting proxy (like Burp) or a captive/campus network.',
+        const syncProvider = () => {
+            const free = settings.get_boolean('use-free-tier');
+            providers.active_name = free ? 'free' : 'custom';
+            provider.subtitle = free
+                ? 'Gemma 4, free with a daily limit'
+                : 'Any OpenAI-compatible API; screen questions need a model that reads images';
+            for (const row of [url, key, name, effort])
+                row.visible = !free;
+            test.subtitle = '';
+        };
+        syncProvider();
+        providers.connect('notify::active-name', () => {
+            const free = providers.active_name === 'free';
+            if (free !== settings.get_boolean('use-free-tier'))
+                settings.set_boolean('use-free-tier', free);
         });
+        settings.connect('changed::use-free-tier', syncProvider);
+
+        const network = new Adw.PreferencesGroup({title: 'Network'});
         page.add(network);
         const insecure = new Adw.SwitchRow({
             title: 'Allow insecure TLS certificates',
-            subtitle: 'Accepts certificates that don’t validate. Leave off unless you need it.',
+            subtitle: 'Only for intercepting proxies and captive portals',
         });
         settings.bind('allow-insecure-tls', insecure, 'active', Gio.SettingsBindFlags.DEFAULT);
         network.add(insecure);
@@ -116,7 +116,7 @@ export default class PenguinPreferences extends ExtensionPreferences {
         const answers = new Adw.PreferencesGroup({title: 'Answers'});
         page.add(answers);
 
-        const instructions = new Adw.EntryRow({title: 'Custom instructions (e.g. “Reply in Hinglish”)'});
+        const instructions = new Adw.EntryRow({title: 'Custom instructions'});
         settings.bind('custom-instructions', instructions, 'text', Gio.SettingsBindFlags.DEFAULT);
         answers.add(instructions);
 
@@ -127,11 +127,10 @@ export default class PenguinPreferences extends ExtensionPreferences {
         const privacy = new Adw.PreferencesGroup({title: 'Privacy'});
         page.add(privacy);
         privacy.add(new Adw.ActionRow({
-            title: 'What leaves your computer',
-            subtitle: 'Only when you ask something: your question, the selected or copied text, and any screenshot ' +
-                'go to the API above. On the free tier that is penguin.zenbleed.tech, through Cloudflare, and Sarvam AI. ' +
-                'The free-tier server keeps the time, your IP address and token counts for 31 days, never what you asked.',
-            subtitle_selectable: true,
+            title: 'What Penguin sends',
+            subtitle: 'Your question, selected text and screenshots go to the provider above, only when you ask. ' +
+                'The free tier goes through penguin.zenbleed.tech to Sarvam AI and keeps the time, IP address and ' +
+                'token counts for 31 days, never your content.',
         }));
 
         return page;
@@ -147,7 +146,8 @@ export default class PenguinPreferences extends ExtensionPreferences {
                 [{role: 'user', content: 'Reply with exactly: OK'}],
                 {reasoningEffort: 'none'});
             const seconds = ((GLib.get_monotonic_time() - started) / 1e6).toFixed(1);
-            row.subtitle = `Connected — ${settings.get_string('model')} replied “${reply.trim().slice(0, 40)}” in ${seconds} s`;
+            const model = settings.get_boolean('use-free-tier') ? FREE_TIER_MODEL : settings.get_string('model');
+            row.subtitle = `Connected — ${model} replied “${reply.trim().slice(0, 40)}” in ${seconds} s`;
         } catch (e) {
             row.subtitle = `Failed: ${e.message}`;
         } finally {
@@ -184,12 +184,11 @@ export default class PenguinPreferences extends ExtensionPreferences {
         const tips = new Adw.PreferencesGroup({title: 'Tips'});
         page.add(tips);
         for (const [title, subtitle] of [
-            ['Explain part of the screen',
-                'Press Print, select a region (GNOME copies it), then press the “explain” shortcut.'],
+            ['Explain part of the screen', 'Press Print, select a region, then press the explain shortcut.'],
             ['Rewrite text in place',
-                'Select text in any app, press the “explain” shortcut, pick Fix writing or Rewrite, then Replace selection.'],
+                'Select text, press the explain shortcut, pick Fix writing or Rewrite, then Replace selection.'],
             ['Inside Penguin',
-                'Enter sends · Esc closes · Ctrl+N new chat · ↑ recalls the last question · Ctrl+Shift+C copies the last answer'],
+                'Enter sends · Esc closes · Ctrl+N new chat · ↑ last question · Ctrl+Shift+C copy last answer'],
             ['From the overview', 'Type a question in Activities search and pick “Ask Penguin”.'],
         ]) {
             tips.add(new Adw.ActionRow({title, subtitle, subtitle_selectable: true}));
@@ -247,7 +246,6 @@ export default class PenguinPreferences extends ExtensionPreferences {
         page.add(look);
         const opacity = new Adw.SpinRow({
             title: 'Opacity',
-            subtitle: 'Lower values let more of the screen show through',
             adjustment: new Gtk.Adjustment({lower: 50, upper: 100, step_increment: 2, page_increment: 10}),
         });
         settings.bind('panel-opacity', opacity, 'value', Gio.SettingsBindFlags.DEFAULT);
@@ -262,7 +260,7 @@ export default class PenguinPreferences extends ExtensionPreferences {
 
         const search = new Adw.SwitchRow({
             title: 'Ask from Activities search',
-            subtitle: 'Questions typed in the overview get an “Ask Penguin” result',
+            subtitle: 'Adds “Ask Penguin” to search results',
         });
         settings.bind('search-provider', search, 'active', Gio.SettingsBindFlags.DEFAULT);
         integration.add(search);

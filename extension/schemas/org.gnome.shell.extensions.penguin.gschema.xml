@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="penguin">
   <schema id="org.gnome.shell.extensions.penguin" path="/org/gnome/shell/extensions/penguin/">
+    <key name="use-free-tier" type="b">
+      <default>true</default>
+      <summary>Use Penguin’s free tier</summary>
+      <description>When off, Penguin uses the custom API URL, key and model.</description>
+    </key>
+    <key name="free-tier-key" type="s">
+      <default>''</default>
+      <summary>Free-tier key</summary>
+      <description>Made on first use; identifies this install to the free tier.</description>
+    </key>
     <key name="api-base-url" type="s">
-      <default>'https://penguin.zenbleed.tech/v1'</default>
-      <summary>API base URL</summary>
-      <description>OpenAI-compatible endpoint, usually ending in /v1. The default is Penguin’s free tier.</description>
+      <default>'https://api.openai.com/v1'</default>
+      <summary>Custom API base URL</summary>
+      <description>OpenAI-compatible endpoint, usually ending in /v1.</description>
     </key>
     <key name="api-key" type="s">
       <default>''</default>
-      <summary>API key</summary>
-      <description>On the free tier Penguin makes its own key the first time it asks something.</description>
+      <summary>Custom API key</summary>
     </key>
     <key name="model" type="s">
-      <default>'gemma4'</default>
-      <summary>Model</summary>
+      <default>'gpt-4o'</default>
+      <summary>Custom model</summary>
       <description>Must accept image input for screen questions.</description>
     </key>
     <key name="reasoning-effort" type="s">

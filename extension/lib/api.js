@@ -10,6 +10,7 @@ Gio._promisify(Gio.File.prototype, 'read_async');
 
 /** Penguin's hosted free tier. Each install sends its own random key, made on first use. */
 export const FREE_TIER_URL = 'https://penguin.zenbleed.tech/v1';
+export const FREE_TIER_MODEL = 'gemma4';
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -81,13 +82,14 @@ export class ChatClient {
      * @returns {Promise<string>} the complete answer
      */
     async complete(messages, {reasoningEffort = 'low', onText = null, cancellable = null} = {}) {
-        const base = this._settings.get_string('api-base-url').trim().replace(/\/+$/, '');
-        let key = this._settings.get_string('api-key').trim();
-        const model = this._settings.get_string('model').trim();
-        if (!key && base === FREE_TIER_URL)
-            key = await freeTierKey(this._settings);
+        const free = this._settings.get_boolean('use-free-tier');
+        const base = free ? FREE_TIER_URL : this._settings.get_string('api-base-url').trim().replace(/\/+$/, '');
+        const model = free ? FREE_TIER_MODEL : this._settings.get_string('model').trim();
+        const key = free ? await freeTierKey(this._settings) : this._settings.get_string('api-key').trim();
+        if (!base)
+            throw new Error('No API URL yet. Add one in Penguin preferences, or switch to the free tier.');
         if (!key)
-            throw new Error('No API key yet. Add one in Penguin preferences.');
+            throw new Error('No API key yet. Add one in Penguin preferences, or switch to the free tier.');
 
         const payload = {
             model,
@@ -169,8 +171,11 @@ export class ChatClient {
     }
 }
 
-/** Makes and saves this install's free-tier key; concurrent first requests share one. */
+/** This install's free-tier key, made and saved on first use; concurrent first requests share one. */
 function freeTierKey(settings) {
+    const saved = settings.get_string('free-tier-key');
+    if (saved)
+        return Promise.resolve(saved);
     pendingKey ??= (async () => {
         const stream = await Gio.File.new_for_path('/dev/urandom').read_async(GLib.PRIORITY_DEFAULT, null);
         const bytes = await stream.read_bytes_async(32, GLib.PRIORITY_DEFAULT, null);
@@ -179,7 +184,7 @@ function freeTierKey(settings) {
             throw new Error('Couldn’t make a key for the free tier.');
         const random = GLib.base64_encode(bytes.toArray()).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         const key = `pg-${random}`;
-        settings.set_string('api-key', key);
+        settings.set_string('free-tier-key', key);
         return key;
     })().finally(() => {
         pendingKey = null;
