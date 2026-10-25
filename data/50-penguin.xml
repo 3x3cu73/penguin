@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<KeyListEntries schema="org.gnome.shell.extensions.penguin"
+                group="system"
+                name="Penguin"
+                wm_name="GNOME Shell"
+                package="penguin">
+
+    <KeyListEntry name="toggle-assistant"
+                  description="Open or close Penguin"/>
+
+    <KeyListEntry name="ask-screen"
+                  description="Ask Penguin about the screen"/>
+
+    <KeyListEntry name="ask-selection"
+                  description="Ask Penguin about selected or copied text"/>
+
+    <KeyListEntry name="look-up"
+                  description="Look up the selected word"/>
+
+    <KeyListEntry name="new-chat"
+                  description="Start a new Penguin chat"/>
+
+</KeyListEntries>

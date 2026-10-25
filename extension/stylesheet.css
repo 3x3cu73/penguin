@@ -1,0 +1,598 @@
+/* Penguin. Dark is the default; .penguin-light on the root actors restyles for the light shell. */
+
+/* Banner */
+
+.penguin-panel {
+  background-color: rgba(30, 30, 34, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.42);
+  padding: 6px 6px 8px 6px;
+  color: #f2f2f4;
+}
+
+.penguin-entry-row {
+  spacing: 2px;
+  padding-left: 10px;
+}
+
+.penguin-logo {
+  icon-size: 20px;
+  color: st-mix(-st-accent-color, #ffffff, 80%);
+}
+
+.penguin-entry,
+.penguin-entry:hover,
+.penguin-entry:focus {
+  background-color: transparent;
+  border: none;
+  box-shadow: none !important;
+  padding: 10px 6px;
+  font-size: 1.2em;
+  color: #ffffff;
+  caret-color: -st-accent-color;
+  selection-background-color: st-transparentize(-st-accent-color, 0.45);
+  selected-color: #ffffff;
+}
+
+.penguin-entry StLabel.hint-text {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.penguin-icon-button {
+  border-radius: 99px;
+  padding: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  background-color: transparent;
+  transition-duration: 100ms;
+}
+
+.penguin-icon-button StIcon {
+  icon-size: 16px;
+}
+
+.penguin-icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+}
+
+.penguin-icon-button:active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.penguin-icon-button:focus,
+.penguin-pill:focus {
+  box-shadow: inset 0 0 0 2px st-transparentize(-st-accent-color, 0.35);
+}
+
+.penguin-icon-button.penguin-small {
+  padding: 5px;
+}
+
+.penguin-icon-button.penguin-small StIcon {
+  icon-size: 14px;
+}
+
+.penguin-pill {
+  border-radius: 99px;
+  padding: 6px 12px;
+  background-color: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.92em;
+  transition-duration: 100ms;
+}
+
+.penguin-pill:hover {
+  background-color: rgba(255, 255, 255, 0.13);
+}
+
+.penguin-pill:active,
+.penguin-pill:checked {
+  background-color: st-transparentize(-st-accent-color, 0.5);
+  color: #ffffff;
+}
+
+.penguin-pill.penguin-small {
+  padding: 4px 10px;
+  font-size: 0.86em;
+}
+
+.penguin-pill.penguin-accent {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}
+
+.penguin-pill.penguin-accent:hover {
+  background-color: st-lighten(-st-accent-color, 6%);
+}
+
+.penguin-pill-box {
+  spacing: 6px;
+}
+
+.penguin-pill-icon {
+  icon-size: 14px;
+}
+
+.penguin-attachments {
+  spacing: 6px;
+  padding: 2px 10px 4px 10px;
+}
+
+.penguin-chip {
+  spacing: 6px;
+  padding: 4px;
+  border-radius: 14px;
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.penguin-chip-thumb {
+  border-radius: 10px;
+}
+
+.penguin-chip-icon {
+  icon-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  padding-left: 6px;
+}
+
+.penguin-chip-label {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 420px;
+}
+
+.penguin-chip-remove {
+  padding: 4px;
+}
+
+.penguin-chip-remove StIcon {
+  icon-size: 12px;
+}
+
+.penguin-actions {
+  spacing: 6px;
+  padding: 2px 10px 6px 10px;
+}
+
+.penguin-hint {
+  font-size: 0.8em;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 0 14px 6px 44px;
+}
+
+.penguin-notice {
+  font-size: 0.9em;
+  color: #f8e45c;
+  padding: 2px 14px 6px 44px;
+}
+
+/* Conversation */
+
+.penguin-nav {
+  spacing: 2px;
+  margin-right: 2px;
+}
+
+.penguin-nav-dot {
+  padding: 7px 5px;
+  border-radius: 99px;
+  transition-duration: 100ms;
+}
+
+.penguin-nav-dot:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+.penguin-nav-dot:focus {
+  box-shadow: inset 0 0 0 2px st-transparentize(-st-accent-color, 0.35);
+}
+
+.penguin-nav-dot-fill {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.penguin-scroll {
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.penguin-list {
+  padding: 4px 14px 4px 14px;
+  spacing: 6px;
+}
+
+.penguin-turn {
+  spacing: 8px;
+  padding-top: 10px;
+}
+
+.penguin-question {
+  spacing: 10px;
+}
+
+.penguin-question-text {
+  font-weight: bold;
+  font-size: 0.92em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.penguin-question-context {
+  font-style: italic;
+  font-size: 0.86em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.penguin-question-thumb {
+  border-radius: 8px;
+}
+
+.penguin-answer {
+  spacing: 8px;
+}
+
+.penguin-prose {
+  font-size: 1.04em;
+  color: #f6f6f8;
+}
+
+.penguin-thinking {
+  spacing: 8px;
+  font-size: 0.92em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.penguin-error {
+  color: #ff938c;
+}
+
+.penguin-answer-actions {
+  spacing: 6px;
+}
+
+.penguin-code {
+  background-color: rgba(0, 0, 0, 0.32);
+  border-radius: 12px;
+  padding: 4px 6px 10px 12px;
+}
+
+.penguin-code-header {
+  spacing: 4px;
+}
+
+.penguin-code-lang {
+  font-size: 0.8em;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.penguin-code-text {
+  font-family: monospace;
+  font-size: 0.92em;
+  color: #e8e8ec;
+  padding-right: 6px;
+}
+
+/* Look Up popover */
+
+.penguin-popover {
+  background-color: rgba(32, 32, 36, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  padding: 10px 10px 10px 16px;
+  color: #f2f2f4;
+}
+
+.penguin-popover-header {
+  spacing: 8px;
+}
+
+.penguin-popover-title {
+  font-size: 1.45em;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.penguin-popover-title.penguin-popover-quote {
+  font-size: 0.95em;
+  font-weight: normal;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.penguin-popover-thumb {
+  border-radius: 8px;
+}
+
+.penguin-popover-modes {
+  spacing: 6px;
+}
+
+.penguin-popover-footer {
+  padding-bottom: 8px;
+}
+
+.penguin-popover-subtitle {
+  font-size: 0.92em;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 0 8px 2px 0;
+}
+
+.penguin-popover-body {
+  spacing: 6px;
+  padding: 6px 8px 8px 0;
+}
+
+.penguin-popover-actions {
+  spacing: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.penguin-popover-answer {
+  spacing: 6px;
+}
+
+/* Dictionary entry */
+
+.penguin-entry {
+  spacing: 2px;
+}
+
+.penguin-entry-pos {
+  font-style: italic;
+  font-weight: bold;
+  color: st-mix(-st-accent-color, #ffffff, 55%);
+  padding: 6px 0 2px 0;
+}
+
+.penguin-entry-sense {
+  spacing: 10px;
+  padding: 3px 0;
+}
+
+.penguin-entry-number {
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.5);
+  min-width: 10px;
+}
+
+.penguin-entry-column {
+  spacing: 4px;
+}
+
+.penguin-entry-group {
+  padding-top: 4px;
+}
+
+.penguin-entry-definition {
+  font-size: 1.02em;
+  color: #f6f6f8;
+}
+
+.penguin-entry-example {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.penguin-entry-chips {
+  padding-top: 2px;
+}
+
+.penguin-entry-chips-title {
+  font-size: 0.86em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.penguin-word-chip {
+  border-radius: 99px;
+  padding: 2px 9px;
+  font-size: 0.86em;
+  background-color: rgba(255, 255, 255, 0.07);
+  color: st-mix(-st-accent-color, #ffffff, 65%);
+  transition-duration: 100ms;
+}
+
+.penguin-word-chip:hover {
+  background-color: st-transparentize(-st-accent-color, 0.6);
+  color: #ffffff;
+}
+
+.penguin-word-chip:focus {
+  box-shadow: inset 0 0 0 2px st-transparentize(-st-accent-color, 0.35);
+}
+
+.penguin-entry-origin {
+  padding-top: 10px;
+  spacing: 2px;
+}
+
+.penguin-entry-origin-title {
+  font-size: 0.82em;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.penguin-entry-origin-text {
+  font-size: 0.94em;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.penguin-wiki {
+  spacing: 12px;
+}
+
+.penguin-wiki-description {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.58);
+  padding-bottom: 4px;
+}
+
+.penguin-wiki-image {
+  border-radius: 8px;
+}
+
+/* Top bar menu */
+
+.penguin-menu-accel {
+  font-size: 0.85em;
+  color: #8e8e94;
+  padding-left: 24px;
+}
+
+/* Light shell style */
+
+.penguin-light.penguin-panel,
+.penguin-light.penguin-popover {
+  background-color: rgba(250, 250, 252, 0.92);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  color: #1e1e22;
+}
+
+.penguin-light .penguin-logo {
+  color: -st-accent-color;
+}
+
+.penguin-light .penguin-entry,
+.penguin-light .penguin-entry:hover,
+.penguin-light .penguin-entry:focus {
+  color: #1e1e22;
+  selected-color: #1e1e22;
+}
+
+.penguin-light .penguin-entry StLabel.hint-text {
+  color: rgba(0, 0, 0, 0.42);
+}
+
+.penguin-light .penguin-icon-button {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.penguin-light .penguin-icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.07);
+  color: #000000;
+}
+
+.penguin-light .penguin-icon-button:active {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.penguin-light .penguin-pill {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #222226;
+}
+
+.penguin-light .penguin-pill:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.penguin-light .penguin-pill:active,
+.penguin-light .penguin-pill:checked {
+  background-color: st-transparentize(-st-accent-color, 0.7);
+  color: #000000;
+}
+
+.penguin-light .penguin-pill.penguin-accent {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}
+
+.penguin-light .penguin-chip {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.penguin-light .penguin-chip-icon,
+.penguin-light .penguin-chip-label {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.penguin-light .penguin-hint {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.penguin-light .penguin-notice {
+  color: #9c6e03;
+}
+
+.penguin-light .penguin-scroll,
+.penguin-light .penguin-popover-actions {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.penguin-light .penguin-nav-dot:hover {
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+.penguin-light .penguin-nav-dot-fill {
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
+.penguin-light .penguin-question-text {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.penguin-light .penguin-question-context,
+.penguin-light .penguin-thinking,
+.penguin-light .penguin-code-lang,
+.penguin-light .penguin-popover-subtitle {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.penguin-light .penguin-prose,
+.penguin-light .penguin-popover-title {
+  color: #1e1e22;
+}
+
+.penguin-light .penguin-popover-title.penguin-popover-quote {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.penguin-light .penguin-entry-pos {
+  color: st-mix(-st-accent-color, #000000, 75%);
+}
+
+.penguin-light .penguin-entry-definition {
+  color: #1e1e22;
+}
+
+.penguin-light .penguin-entry-number,
+.penguin-light .penguin-entry-chips-title,
+.penguin-light .penguin-entry-origin-title {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.penguin-light .penguin-entry-example,
+.penguin-light .penguin-wiki-description {
+  color: rgba(0, 0, 0, 0.58);
+}
+
+.penguin-light .penguin-entry-origin-text {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.penguin-light .penguin-word-chip {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: st-mix(-st-accent-color, #000000, 70%);
+}
+
+.penguin-light .penguin-word-chip:hover {
+  background-color: st-transparentize(-st-accent-color, 0.75);
+  color: #000000;
+}
+
+.penguin-light .penguin-error {
+  color: #c01c28;
+}
+
+.penguin-light .penguin-code {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.penguin-light .penguin-code-text {
+  color: #2a2a2e;
+}

@@ -1,0 +1,10 @@
+{
+  "uuid": "penguin@sumit.github.io",
+  "name": "Penguin",
+  "description": "An AI assistant built into GNOME Shell. Ask anything, ask about your screen or selected text, and look up words from anywhere.",
+  "shell-version": ["50"],
+  "settings-schema": "org.gnome.shell.extensions.penguin",
+  "gettext-domain": "penguin",
+  "version-name": "1.0",
+  "url": "https://github.com/3x3cu73/penguin"
+}

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Control the Penguin assistant (GNOME Shell extension) from a terminal or launcher.
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: penguin [COMMAND]
+
+  toggle            open or close Penguin (default)
+  ask QUESTION…     open Penguin and ask
+  screen            ask about the screen
+  selection         explain the selected or copied text/image
+  lookup            look up the selected word
+  new               start a new chat
+  prefs             open preferences
+EOF
+}
+
+call() {
+    if ! gdbus call --session --dest org.gnome.Shell --object-path /io/github/sumit/Penguin \
+        --method "io.github.sumit.Penguin.$1" "${@:2}" > /dev/null 2>&1; then
+        echo "Penguin isn't running. Log out and back in after installing, or check: gnome-extensions info penguin@sumit.github.io" >&2
+        exit 1
+    fi
+}
+
+case "${1:-toggle}" in
+    toggle) call Toggle ;;
+    open) call Open ;;
+    ask)
+        shift
+        question="$*"
+        call Ask "$(python3 -c 'import sys; from gi.repository import GLib; print(GLib.Variant("s", sys.argv[1]).print_(False))' "$question")"
+        ;;
+    screen) call AskScreen ;;
+    selection) call AskSelection ;;
+    lookup) call LookUp ;;
+    new) call NewChat ;;
+    prefs) gnome-extensions prefs penguin@sumit.github.io ;;
+    -h | --help | help) usage ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

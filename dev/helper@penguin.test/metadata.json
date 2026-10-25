@@ -1,0 +1,6 @@
+{
+  "uuid": "helper@penguin.test",
+  "name": "Penguin test helper",
+  "description": "Enables unsafe mode inside the throwaway headless test shell so Eval and Screenshot work over D-Bus.",
+  "shell-version": ["50"]
+}

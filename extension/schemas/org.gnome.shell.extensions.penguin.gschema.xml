@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="penguin">
+  <schema id="org.gnome.shell.extensions.penguin" path="/org/gnome/shell/extensions/penguin/">
+    <key name="api-base-url" type="s">
+      <default>'https://api.openai.com/v1'</default>
+      <summary>API base URL</summary>
+      <description>OpenAI-compatible endpoint, usually ending in /v1.</description>
+    </key>
+    <key name="api-key" type="s">
+      <default>''</default>
+      <summary>API key</summary>
+    </key>
+    <key name="model" type="s">
+      <default>'gpt-4o'</default>
+      <summary>Model</summary>
+      <description>Must accept image input for screen questions.</description>
+    </key>
+    <key name="reasoning-effort" type="s">
+      <choices>
+        <choice value="none"/>
+        <choice value="minimal"/>
+        <choice value="low"/>
+        <choice value="medium"/>
+        <choice value="high"/>
+      </choices>
+      <default>'low'</default>
+      <summary>Reasoning effort for chat answers</summary>
+    </key>
+    <key name="allow-insecure-tls" type="b">
+      <default>false</default>
+      <summary>Accept TLS certificates that don’t validate</summary>
+      <description>Needed behind an intercepting proxy (e.g. Burp) or a captive/campus network. Turns off protection against a real man-in-the-middle, so leave off unless you need it.</description>
+    </key>
+    <key name="custom-instructions" type="s">
+      <default>''</default>
+      <summary>Extra instructions appended to the system prompt</summary>
+    </key>
+    <key name="translate-language" type="s">
+      <default>'Hindi'</default>
+      <summary>Language that English text is translated into</summary>
+      <description>Text in any other language is translated into English.</description>
+    </key>
+    <key name="panel-opacity" type="i">
+      <range min="50" max="100"/>
+      <default>90</default>
+      <summary>Banner opacity, in percent</summary>
+    </key>
+    <key name="show-indicator" type="b">
+      <default>true</default>
+      <summary>Show the Penguin icon in the top bar</summary>
+    </key>
+    <key name="search-provider" type="b">
+      <default>true</default>
+      <summary>Offer “Ask Penguin” in Activities search</summary>
+    </key>
+    <key name="toggle-assistant" type="as">
+      <default><![CDATA[['<Super>i', '<Shift><Super>F23']]]></default>
+      <summary>Open or close Penguin</summary>
+    </key>
+    <key name="ask-screen" type="as">
+      <default><![CDATA[['<Shift><Super>s']]]></default>
+      <summary>Ask about the screen</summary>
+    </key>
+    <key name="ask-selection" type="as">
+      <default><![CDATA[['<Shift><Super>c']]]></default>
+      <summary>Ask about the selection or clipboard</summary>
+    </key>
+    <key name="look-up" type="as">
+      <default><![CDATA[['<Control><Super>d']]]></default>
+      <summary>Look up the selected word</summary>
+    </key>
+    <key name="new-chat" type="as">
+      <default><![CDATA[['<Shift><Super>n']]]></default>
+      <summary>Start a new chat</summary>
+    </key>
+  </schema>
+</schemalist>

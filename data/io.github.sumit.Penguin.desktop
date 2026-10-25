@@ -1,0 +1,28 @@
+[Desktop Entry]
+Type=Application
+Name=Penguin
+GenericName=AI Assistant
+Comment=Ask anything, ask about your screen or selected text, look up words
+Icon=io.github.sumit.Penguin
+Exec=@BIN@/penguin toggle
+Terminal=false
+Categories=Utility;
+Keywords=ai;assistant;chat;gpt;ask;question;dictionary;look up;define;translate;
+StartupNotify=false
+Actions=screen;selection;new-chat;preferences;
+
+[Desktop Action screen]
+Name=Ask About Screen
+Exec=@BIN@/penguin screen
+
+[Desktop Action selection]
+Name=Explain Selection
+Exec=@BIN@/penguin selection
+
+[Desktop Action new-chat]
+Name=New Chat
+Exec=@BIN@/penguin new
+
+[Desktop Action preferences]
+Name=Preferences
+Exec=@BIN@/penguin prefs
