@@ -15,6 +15,7 @@ class PenguinIndicator extends PanelMenu.Button {
         super(0.5, 'Penguin');
         this._settings = settings;
         this._accels = [];
+        this._idleId = 0;
 
         this.add_child(new St.Icon({gicon: assistant.gicon, style_class: 'system-status-icon'}));
 
@@ -35,7 +36,12 @@ class PenguinIndicator extends PanelMenu.Button {
         item.connect('activate', () => {
             // Close instantly so the menu never ends up in a screenshot.
             this.menu.close(PopupAnimation.NONE);
-            GLib.idle_add_once(GLib.PRIORITY_DEFAULT, action);
+            if (this._idleId)
+                GLib.source_remove(this._idleId);
+            this._idleId = GLib.idle_add_once(GLib.PRIORITY_DEFAULT, () => {
+                this._idleId = 0;
+                action();
+            });
         });
         if (key) {
             const accel = new St.Label({
@@ -56,6 +62,9 @@ class PenguinIndicator extends PanelMenu.Button {
     }
 
     destroy() {
+        if (this._idleId)
+            GLib.source_remove(this._idleId);
+        this._idleId = 0;
         this._settings.disconnectObject(this);
         super.destroy();
     }

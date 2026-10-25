@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="penguin">
+<schemalist>
   <schema id="org.gnome.shell.extensions.penguin" path="/org/gnome/shell/extensions/penguin/">
     <key name="use-free-tier" type="b">
       <default>true</default>

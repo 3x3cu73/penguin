@@ -211,7 +211,6 @@ class PenguinPanel extends St.BoxLayout {
     }
 
     _buildConversation() {
-        // One message is shown at a time; the header arrows page through the history.
         this._index = -1;
         this._list = new St.BoxLayout({
             style_class: 'penguin-list',
@@ -515,8 +514,6 @@ class PenguinPanel extends St.BoxLayout {
     }
 
     _syncComposer() {
-        if (this._destroyed)
-            return;
         this._attachmentRow.visible = this.hasAttachments;
 
         this._actionRow.destroy_all_children();
@@ -563,12 +560,11 @@ class PenguinPanel extends St.BoxLayout {
         this.style = `background-color: rgba(${base}, ${alpha});`;
     }
 
-    _syncUnredirect() {
-        const wanted = this.visible && !this._destroyed;
-        if (wanted === this._unredirectDisabled)
+    _syncUnredirect(disabled = this.visible) {
+        if (disabled === this._unredirectDisabled)
             return;
-        this._unredirectDisabled = wanted;
-        if (wanted)
+        this._unredirectDisabled = disabled;
+        if (disabled)
             global.compositor.disable_unredirect();
         else
             global.compositor.enable_unredirect();
@@ -687,8 +683,7 @@ class PenguinPanel extends St.BoxLayout {
     }
 
     _onDestroy() {
-        this._destroyed = true;
-        this._syncUnredirect();
+        this._syncUnredirect(false);
         this.unfocus();
         for (const item of this._images)
             item.alive = false;

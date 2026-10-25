@@ -25,7 +25,8 @@ EX: an example sentence for the definition above, without quotation marks
 SYN: up to 5 synonyms for the definition above, comma-separated
 OPP: up to 3 opposites for the definition above, comma-separated, only if common
 ORIGIN: the word's origin in one sentence
-Give the 1 to 3 most common senses for each word class, most common first, and at most 3 word classes. Start each word class with a POS line. Use EX, SYN and OPP only right after a DEF. Put ORIGIN last.
+Give the 1 to 3 most common senses for each word class, most common first, and at most 3 word classes.
+Start each word class with a POS line. Use EX, SYN and OPP only right after a DEF. Put ORIGIN last.
 For names, abbreviations, slang or technical terms use the same format (POS can be proper noun, abbreviation, etc.) and leave out PRON or ORIGIN if they don't apply.
 If the term isn't English, start with LANG: followed by the language, and write the definitions in English.
 If you don't recognise the term, reply with one line: NONE: followed by a one-sentence best guess.`;

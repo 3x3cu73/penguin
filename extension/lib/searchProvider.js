@@ -17,6 +17,13 @@ export class PenguinSearchProvider {
         this.appInfo = GioUnix.DesktopAppInfo.new(APP_ID);
         this.canLaunchSearch = true;
         this.isRemoteProvider = false;
+        this._idleId = 0;
+    }
+
+    destroy() {
+        if (this._idleId)
+            GLib.source_remove(this._idleId);
+        this._idleId = 0;
     }
 
     _query(terms) {
@@ -48,12 +55,21 @@ export class PenguinSearchProvider {
     }
 
     activateResult(id) {
-        // Runs before the overview starts closing; ask once it has.
-        GLib.idle_add_once(GLib.PRIORITY_DEFAULT, () => this._assistant.ask(id));
+        this._askLater(id);
     }
 
     launchSearch(terms) {
-        GLib.idle_add_once(GLib.PRIORITY_DEFAULT, () => this._assistant.ask(this._query(terms)));
+        this._askLater(this._query(terms));
+    }
+
+    // Activation runs before the overview starts closing; ask once it has.
+    _askLater(question) {
+        if (this._idleId)
+            GLib.source_remove(this._idleId);
+        this._idleId = GLib.idle_add_once(GLib.PRIORITY_DEFAULT, () => {
+            this._idleId = 0;
+            this._assistant.ask(question);
+        });
     }
 
     createResultObject() {

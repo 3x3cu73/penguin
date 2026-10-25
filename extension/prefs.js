@@ -230,12 +230,12 @@ export default class PenguinPreferences extends ExtensionPreferences {
 
         // Let Super combos reach the dialog instead of triggering shell shortcuts.
         const surface = window.get_surface();
-        surface?.inhibit_system_shortcuts?.(null);
+        surface.inhibit_system_shortcuts(null);
         dialog.connect('response', (_dialog, response) => {
             if (response === 'reset')
                 settings.reset(key);
         });
-        dialog.connect('closed', () => surface?.restore_system_shortcuts?.());
+        dialog.connect('closed', () => surface.restore_system_shortcuts());
         dialog.present(window);
     }
 

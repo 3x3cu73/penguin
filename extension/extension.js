@@ -11,9 +11,9 @@ import {PenguinSearchProvider} from './lib/searchProvider.js';
 
 const KEYBINDINGS = {
     'toggle-assistant': assistant => assistant.toggle(),
-    'ask-screen': assistant => assistant.askAboutScreen(),
-    'ask-selection': assistant => assistant.explainSelection(),
-    'look-up': assistant => assistant.lookUp(),
+    'ask-screen': assistant => assistant.askAboutScreen().catch(logError),
+    'ask-selection': assistant => assistant.explainSelection().catch(logError),
+    'look-up': assistant => assistant.lookUp().catch(logError),
     'new-chat': assistant => assistant.newChat(),
 };
 
@@ -27,7 +27,7 @@ export default class PenguinExtension extends Extension {
             Main.wm.addKeybinding(name, this._settings,
                 Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
                 Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW | Shell.ActionMode.POPUP,
-                () => Promise.resolve(action(this._assistant)).catch(logError));
+                () => action(this._assistant));
         }
 
         this._settings.connectObject(
@@ -45,8 +45,10 @@ export default class PenguinExtension extends Extension {
 
         this._indicator?.destroy();
         this._indicator = null;
-        if (this._searchProvider)
+        if (this._searchProvider) {
             Main.overview.searchController.removeProvider(this._searchProvider);
+            this._searchProvider.destroy();
+        }
         this._searchProvider = null;
 
         this._dbus.destroy();
@@ -78,6 +80,7 @@ export default class PenguinExtension extends Extension {
             Main.overview.searchController.addProvider(provider);
         } else if (!wanted && this._searchProvider) {
             Main.overview.searchController.removeProvider(this._searchProvider);
+            this._searchProvider.destroy();
             this._searchProvider = null;
         }
     }

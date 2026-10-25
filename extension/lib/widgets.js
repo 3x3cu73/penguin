@@ -9,14 +9,14 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Markdown from './markdown.js';
 
 /** Keeps `penguin-light` on the actor in sync with the shell's light/dark style. */
-export function trackColorScheme(actor, onChanged = null) {
+export function trackColorScheme(actor, onChanged = () => {}) {
     const settings = St.Settings.get();
     const sync = () => {
         if (Main.getStyleVariant() === 'light')
             actor.add_style_class_name('penguin-light');
         else
             actor.remove_style_class_name('penguin-light');
-        onChanged?.();
+        onChanged();
     };
     settings.connectObject('notify::color-scheme', sync, actor);
     actor.connect('destroy', () => settings.disconnectObject(actor));

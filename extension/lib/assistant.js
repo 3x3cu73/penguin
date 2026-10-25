@@ -21,7 +21,6 @@ export class Assistant {
     constructor(extension, settings) {
         this._extension = extension;
         this._settings = settings;
-        this._destroyed = false;
         this._cancellable = null;
         this._lookupCancellable = null;
 
@@ -38,14 +37,19 @@ export class Assistant {
     }
 
     destroy() {
-        this._destroyed = true;
         this._cancellable?.cancel();
         this._lookupCancellable?.cancel();
         this._lookup.destroy();
+        this._lookup = null;
         this._panel.destroy();
+        this._panel = null;
         this._paster.destroy();
+        this._paster = null;
         this._tracker.destroy();
+        this._tracker = null;
         this._client.destroy();
+        this._client = null;
+        this._dictionary = null;
     }
 
     get busy() {
@@ -77,13 +81,13 @@ export class Assistant {
         try {
             grab = await Capture.grabMonitor(monitorIndex);
         } catch (e) {
-            if (this._destroyed)
+            if (!this._panel)
                 return;
             this._panel.open();
             this._panel.showNotice(`Couldn’t capture the screen: ${e.message}`);
             return;
         }
-        if (this._destroyed)
+        if (!this._panel)
             return;
         this._panel.open();
         this._panel.attachImage(Capture.encodeGrab(grab));
@@ -146,11 +150,10 @@ export class Assistant {
             images = await Promise.all(pending);
         } catch (e) {
             this._end(cancellable);
-            if (!this._destroyed)
-                this._panel.showNotice(`Couldn’t read the image: ${e.message}`);
+            this._panel?.showNotice(`Couldn’t read the image: ${e.message}`);
             return;
         }
-        if (this._destroyed || cancellable.is_cancelled()) {
+        if (cancellable.is_cancelled()) {
             this._end(cancellable);
             return;
         }
@@ -185,8 +188,7 @@ export class Assistant {
         if (this._cancellable !== cancellable)
             return;
         this._cancellable = null;
-        if (!this._destroyed)
-            this._panel.setBusy(false);
+        this._panel?.setBusy(false);
     }
 
     async _stream(turn, cancellable) {
@@ -195,13 +197,11 @@ export class Assistant {
             try {
                 answer = await this._ask(turn, cancellable);
             } catch (e) {
-                if (!(e instanceof ContextTooLongError) || Chat.getTurns().length < 2)
+                if (!(e instanceof ContextTooLongError) || Chat.getTurns().length < 2 || cancellable.is_cancelled())
                     throw e;
                 Chat.keepOnly(turn);
-                if (!this._destroyed) {
-                    this._panel.renderTurns(Chat.getTurns());
-                    this._panel.showNotice('Earlier messages were cleared to fit the length limit.');
-                }
+                this._panel.renderTurns(Chat.getTurns());
+                this._panel.showNotice('Earlier messages were cleared to fit the length limit.');
                 answer = await this._ask(turn, cancellable);
             }
             if (!answer)
@@ -216,8 +216,7 @@ export class Assistant {
         } finally {
             turn.done = true;
             this._end(cancellable);
-            if (!this._destroyed)
-                this._panel.updateTurn(turn, {immediate: true});
+            this._panel?.updateTurn(turn, {immediate: true});
         }
     }
 
@@ -228,8 +227,7 @@ export class Assistant {
             cancellable,
             onText: text => {
                 turn.answer = text;
-                if (!this._destroyed)
-                    this._panel.updateTurn(turn);
+                this._panel?.updateTurn(turn);
             },
         });
     }
@@ -264,7 +262,7 @@ export class Assistant {
     }
 
     _showCard(found, shortcutKey, title, {offline = false} = {}) {
-        if (this._destroyed)
+        if (!this._lookup)
             return;
         if (!found) {
             const accel = accelLabel(this._settings.get_strv(shortcutKey)[0]);
@@ -340,12 +338,10 @@ export class Assistant {
         } finally {
             if (this._lookupCancellable === cancellable) {
                 this._lookupCancellable = null;
-                if (!this._destroyed) {
-                    this._lookup.setDone({
-                        replaceable: subject.kind === 'text' && subject.source === 'primary' &&
-                            REPLACEABLE_MODES.has(mode),
-                    });
-                }
+                this._lookup?.setDone({
+                    replaceable: subject.kind === 'text' && subject.source === 'primary' &&
+                        REPLACEABLE_MODES.has(mode),
+                });
             }
         }
     }
@@ -384,8 +380,11 @@ export class Assistant {
             return;
         try {
             const bytes = await this._client.getBytes(image, cancellable);
-            if (bytes && !cancellable.is_cancelled())
-                this._lookup.setWikipediaImage(await Capture.imageContentFromBytes(bytes, 84));
+            if (!bytes)
+                return;
+            const content = await Capture.imageContentFromBytes(bytes, 84);
+            if (!cancellable.is_cancelled())
+                this._lookup.setWikipediaImage(content);
         } catch (e) {
             if (!isCancelled(e))
                 console.warn(`Penguin: couldn’t load the Wikipedia image: ${e.message}`);
@@ -444,8 +443,7 @@ export class Assistant {
             try {
                 grab = await Capture.grabMonitor(global.display.get_current_monitor());
             } finally {
-                if (!this._destroyed)
-                    this._lookup.restoreAfterCapture();
+                this._lookup?.restoreAfterCapture();
             }
             const image = await Capture.encodeGrab(grab);
             return {

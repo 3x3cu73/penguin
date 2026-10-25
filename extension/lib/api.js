@@ -88,7 +88,7 @@ export class ChatClient {
      * @param {Gio.Cancellable} options.cancellable
      * @returns {Promise<string>} the complete answer
      */
-    async complete(messages, {reasoningEffort = 'low', onText = null, cancellable = null} = {}) {
+    async complete(messages, {reasoningEffort = 'low', onText = () => {}, cancellable = null} = {}) {
         const free = this._settings.get_boolean('use-free-tier');
         const base = free ? FREE_TIER_URL : this._settings.get_string('api-base-url').trim().replace(/\/+$/, '');
         const model = free ? FREE_TIER_MODEL : this._settings.get_string('model').trim();
@@ -152,7 +152,7 @@ export class ChatClient {
                 const [raw] = await lines.read_line_async(GLib.PRIORITY_DEFAULT, cancellable);
                 if (raw === null)
                     break;
-                const line = typeof raw === 'string' ? raw : decoder.decode(raw);
+                const line = decoder.decode(raw);
                 if (!line.startsWith('data:'))
                     continue;
                 const data = line.slice(5).trim();
@@ -171,7 +171,7 @@ export class ChatClient {
                 const delta = event.choices?.[0]?.delta?.content;
                 if (typeof delta === 'string' && delta.length > 0) {
                     text += delta;
-                    onText?.(text);
+                    onText(text);
                 }
             }
         } finally {

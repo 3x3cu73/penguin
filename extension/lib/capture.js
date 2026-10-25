@@ -26,6 +26,7 @@ const lastChange = {primary: 0, clipboard: 0};
 export class SelectionTracker {
     constructor() {
         this._selection = global.display.get_selection();
+        this._idleId = 0;
         this._id = this._selection.connect('owner-changed', (_selection, type) => {
             if (type === Meta.SelectionType.SELECTION_PRIMARY)
                 lastChange.primary = GLib.get_monotonic_time();
@@ -38,7 +39,25 @@ export class SelectionTracker {
         return lastChange.clipboard > lastChange.primary;
     }
 
+    // Shortcut handlers run inside a grab. Starting a selection transfer there makes
+    // Mutter cancel it when the grab ends ("Could not fetch selection data: Broken
+    // pipe"), which drops the clipboard the next paste tries to read. Wait until
+    // this handler has returned and the grab is gone.
+    afterShortcutGrab() {
+        return new Promise(resolve => {
+            if (this._idleId)
+                GLib.source_remove(this._idleId);
+            this._idleId = GLib.idle_add_once(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                this._idleId = 0;
+                resolve();
+            });
+        });
+    }
+
     destroy() {
+        if (this._idleId)
+            GLib.source_remove(this._idleId);
+        this._idleId = 0;
         this._selection.disconnect(this._id);
     }
 }
@@ -60,16 +79,6 @@ function offersText(types) {
     return types.some(mime => {
         const name = mime.split(';')[0].trim().toLowerCase();
         return name.startsWith('text/') || name === 'utf8_string' || name === 'string' || name === 'text';
-    });
-}
-
-// Shortcut handlers run inside a grab. Starting a selection transfer there makes
-// Mutter cancel it when the grab ends ("Could not fetch selection data: Broken
-// pipe"), which drops the clipboard the next paste tries to read. Wait until
-// this handler has returned and the grab is gone.
-function afterShortcutGrab() {
-    return new Promise(resolve => {
-        GLib.idle_add_once(GLib.PRIORITY_DEFAULT_IDLE, resolve);
     });
 }
 
@@ -116,7 +125,7 @@ async function readClipboard(allowImage) {
  * @returns {Promise<?{text?: string, source?: string, image?: Promise<object>}>}
  */
 export async function readSelectionOrClipboard(tracker, {allowImage = true} = {}) {
-    await afterShortcutGrab();
+    await tracker.afterShortcutGrab();
 
     if (!tracker.clipboardIsNewer) {
         const primary = await readText(St.ClipboardType.PRIMARY);
