@@ -28,6 +28,11 @@ export function clear() {
     turns.length = 0;
 }
 
+/** Forgets every turn except this one. */
+export function keepOnly(turn) {
+    turns.splice(0, turns.length, turn);
+}
+
 export function isLast(turn) {
     return turns.at(-1) === turn;
 }

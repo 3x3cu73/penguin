@@ -4,6 +4,8 @@ An AI assistant built into GNOME Shell. Ask anything, ask about your screen or s
 
 It works right after install on a free tier, with no account or key. If you want more, point it at any OpenAI-compatible API and use your own key.
 
+Website: [penguin.zenbleed.tech](https://penguin.zenbleed.tech/)
+
 ![Look Up explaining a word in context](screenshots/01-lookup.png)
 
 ![Asking Penguin about a selected term](screenshots/02-ask-banner.png)

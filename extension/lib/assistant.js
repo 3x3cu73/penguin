@@ -1,6 +1,6 @@
 import Gio from 'gi://Gio';
 
-import {ChatClient, isCancelled} from './api.js';
+import {ChatClient, ContextTooLongError, isCancelled} from './api.js';
 import * as Capture from './capture.js';
 import * as Chat from './chat.js';
 import {LookupPopover} from './lookup.js';
@@ -191,21 +191,25 @@ export class Assistant {
 
     async _stream(turn, cancellable) {
         try {
-            const messages = Chat.buildMessages(
-                Prompts.systemPrompt(this._settings.get_string('custom-instructions')));
-            const answer = await this._client.complete(messages, {
-                reasoningEffort: this._settings.get_string('reasoning-effort'),
-                cancellable,
-                onText: text => {
-                    turn.answer = text;
-                    if (!this._destroyed)
-                        this._panel.updateTurn(turn);
-                },
-            });
+            let answer;
+            try {
+                answer = await this._ask(turn, cancellable);
+            } catch (e) {
+                if (!(e instanceof ContextTooLongError) || Chat.getTurns().length < 2)
+                    throw e;
+                Chat.keepOnly(turn);
+                if (!this._destroyed) {
+                    this._panel.renderTurns(Chat.getTurns());
+                    this._panel.showNotice('Earlier messages were cleared to fit the length limit.');
+                }
+                answer = await this._ask(turn, cancellable);
+            }
             if (!answer)
                 turn.error = 'The model returned an empty answer.';
         } catch (e) {
-            if (!isCancelled(e))
+            if (e instanceof ContextTooLongError)
+                turn.error = 'This message is too long to send. Shorten it and try again.';
+            else if (!isCancelled(e))
                 turn.error = e.message;
             else if (!turn.answer)
                 turn.error = 'Stopped.';
@@ -215,6 +219,19 @@ export class Assistant {
             if (!this._destroyed)
                 this._panel.updateTurn(turn, {immediate: true});
         }
+    }
+
+    _ask(turn, cancellable) {
+        const messages = Chat.buildMessages(Prompts.systemPrompt(this._settings.get_string('custom-instructions')));
+        return this._client.complete(messages, {
+            reasoningEffort: this._settings.get_string('reasoning-effort'),
+            cancellable,
+            onText: text => {
+                turn.answer = text;
+                if (!this._destroyed)
+                    this._panel.updateTurn(turn);
+            },
+        });
     }
 
     replaceSelection(turn) {

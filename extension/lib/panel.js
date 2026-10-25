@@ -102,7 +102,11 @@ class TurnView {
     destroy() {
         if (this._flashId)
             GLib.source_remove(this._flashId);
+        this._flashId = 0;
+        this._footer.destroy();
+        this._footer = null;
         this.actor.destroy();
+        this.actor = null;
     }
 }
 
@@ -690,8 +694,11 @@ class PenguinPanel extends St.BoxLayout {
             item.alive = false;
         for (const view of this._views.values())
             view.destroy();
+        this._views.clear();
+        this._dirty.clear();
         if (this._renderId)
             GLib.source_remove(this._renderId);
+        this._renderId = 0;
         global.focus_manager.remove_group(this);
         Main.layoutManager.disconnectObject(this);
         this._settings.disconnectObject(this);

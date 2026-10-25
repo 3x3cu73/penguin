@@ -21,6 +21,13 @@ let pendingKey = null;
 // request retried once if a 400 response names them.
 const OPTIONAL_PARAMS = ['verbosity', 'reasoning_effort'];
 
+// The free tier answers 413 when a conversation is too long, as nginx does for
+// oversized bodies; OpenAI-style servers answer 400 with wording like this.
+const TOO_LONG = /context_length_exceeded|context length|context window|maximum context|too many tokens|reduce the length/i;
+
+/** The conversation is longer than the API accepts. */
+export class ContextTooLongError extends Error {}
+
 export function isCancelled(error) {
     return error instanceof GLib.Error &&
         error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED);
@@ -125,7 +132,10 @@ export class ChatClient {
                 rejected.forEach(p => delete payload[p]);
                 continue;
             }
-            throw new Error(describeError(status, message.get_reason_phrase(), body));
+            const description = describeError(status, message.get_reason_phrase(), body);
+            if (status === 413 || (status === 400 && TOO_LONG.test(body)))
+                throw new ContextTooLongError(description);
+            throw new Error(description);
         }
     }
 
